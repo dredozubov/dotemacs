@@ -1,4 +1,9 @@
+;;; disable toolbar
 (tool-bar-mode -1)
+
+;;; enables gemacs to start in front of terminal multiplexor
+(x-focus-frame nil)
+
 ;;; package manager initialization
 (require 'package)
 (add-to-list 'package-archives
@@ -18,19 +23,50 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
 ;;; setting default color theme
 (load-theme 'solarized-dark)
-;;; enable line numbers
-(linum-mode t)
-;;; toggle comment
-;;; see http://stackoverflow.com/a/9697222/2008797
-(defun toggle-comment ()
-    "Comments or uncomments the region or the current line if there's no active region."
-    (interactive)
-    (let (beg end)
-        (if (region-active-p)
-            (setq beg (region-beginning) end (region-end))
-            (setq beg (line-beginning-position) end (line-end-position)))
-        (toggle-comment beg end)))
-;; (global-set-key (kbd "M-x C-,") 'toggle-comment)
 
+;;; enable line numbers
+(global-linum-mode 1)
+
+;;; comments toggler
+;;; http://www.emacswiki.org/emacs/CommentingCode
+(defun toggle-comment ()
+      (interactive)
+      (let ((start (line-beginning-position))
+            (end (line-end-position)))
+        (when (region-active-p)
+          (setq start (save-excursion
+                        (goto-char (region-beginning))
+                        (beginning-of-line)
+                        (point))
+                end (save-excursion
+                      (goto-char (region-end))
+                      (end-of-line)
+                      (point))))
+        (comment-or-uncomment-region start end)))
+(global-set-key (kbd "M-;") 'toggle-comment)
+
+;;; set font size
+(set-face-attribute 'default nil :height 150)
+
+;;; super-tab
+(global-set-key (kbd "TAB") 'hippie-expand)
+
+;;; electric enabled by default
+;;; provides indentation on RET
+(electric-indent-mode +1)
+
+;;; use only tabs for indentation
+(setq-default indent-tabs-mode nil)
+
+;;; C-SPC won't work on OS X, so use C-m instead
+;;; but first, we need to unbind RET from C-m
+(global-set-key (kbd "RET") 'newline)
+(global-set-key (kbd "C-m") 'set-mark-command)
+
+;;; erlang-mode
+
+;;; disable electric commands
+(setq erlang-electric-commands '())

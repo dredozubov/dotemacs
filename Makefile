@@ -2,7 +2,7 @@ create_emacs.d:
 	mkdir ~/.emacs.d
 
 link:
-	ln -sfn `pwd`/ ~/.emacs.d
+	ln -sfn `pwd`/emacs.el ~/.emacs
 
 link_osx_bin:
 	ln -sfn `pwd`/bin/emacs /usr/local/bin/gemacs
