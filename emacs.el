@@ -127,6 +127,11 @@
 (require 'haskell-process)
 (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
+; Make Emacs look in Cabal directory for binaries
+(let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
+  (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
+  (add-to-list 'exec-path my-cabal-path))
+
 ;;; indentation
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
