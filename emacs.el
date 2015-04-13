@@ -10,10 +10,21 @@
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(package-initialize)
 
 (defvar packages-to-install
              '(slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash))
+
+; activate all the packages (in particular autoloads)
+(package-initialize)
+
+; fetch the list of packages available 
+(unless package-archive-contents
+  (package-refresh-contents))
+
+; install the missing packages
+(dolist (package packages-to-install)
+  (unless (package-installed-p package)
+    (package-install package)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
