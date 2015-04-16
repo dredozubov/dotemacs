@@ -12,16 +12,19 @@
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 
 (defvar packages-to-install
-             '(slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash))
+             '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash))
 
-; activate all the packages (in particular autoloads)
+;;; activate all the packages (in particular autoloads)
 (package-initialize)
 
-; fetch the list of packages available 
+;;; enable evil-mode by default
+(evil-mode 1)
+
+;;; fetch the list of packages available 
 (unless package-archive-contents
   (package-refresh-contents))
 
-; install the missing packages
+;;; install the missing packages
 (dolist (package packages-to-install)
   (unless (package-installed-p package)
     (package-install package)))
@@ -80,6 +83,9 @@
                       (point))))
         (comment-or-uncomment-region start end)))
 (global-set-key (kbd "M-;") 'toggle-comment)
+
+;;; evil-nerd-commenter
+(evilnc-default-hotkeys)
 
 ;;; set font size
 (set-face-attribute 'default nil :height 150)
