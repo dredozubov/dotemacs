@@ -64,9 +64,9 @@
  '(org-latex-pdf-process
    (quote
     ("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f")))
- ;; '(purescript-mode-hook
- ;;   (quote
- ;;    (turn-on-purescript-indent turn-on-purescript-unicode-input-method)))
+ '(purescript-mode-hook
+   (quote
+    (turn-on-purescript-indent turn-on-purescript-unicode-input-method)))
  '(scheme-program-name "mit-scheme"))
 
 (custom-set-faces
