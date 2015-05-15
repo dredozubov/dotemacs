@@ -4,6 +4,9 @@
 ;;; enables gemacs to start in front of terminal multiplexor
 (x-focus-frame nil)
 
+;; line wrap everywhere
+(global-visual-line-mode t)
+
 ;;; package manager initialization
 (require 'package)
 (add-to-list 'package-archives
@@ -12,15 +15,21 @@
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 
 (defvar packages-to-install
-             '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash))
+             '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company))
 
 ;;; activate all the packages (in particular autoloads)
 (package-initialize)
 
+;;; cyrillic layout
+;; (setq set-input-method "cyrillic-yawerty")
+
+;;; org mode
+(require 'org)
+
 ;;; enable evil-mode by default
 (evil-mode 1)
 
-;;; fetch the list of packages available 
+;;; fetch the list of packages available
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -34,15 +43,32 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(add-to-list (quote org-latex-packages-alist) t)
  '(custom-safe-themes
    (quote
     ("1297a022df4228b81bc0436230f211bad168a117282c20ddcba2db8c6a200743" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "e16a771a13a202ee6e276d06098bc77f008b73bbac4d526f160faa2d76c1dd0e" default)))
+ '(global-auto-revert-non-file-buffers t)
  '(haskell-process-auto-import-loaded-modules t)
  '(haskell-process-log t)
  '(haskell-process-suggest-remove-import-lines t)
  '(haskell-process-type (quote cabal-repl))
  '(haskell-tags-on-save t)
+ '(org-beamer-frame-default-options "")
+ '(org-latex-create-formula-image-program (quote dvipng))
+ '(org-latex-packages-alist
+   (quote
+    (("" "cmap" t)
+     ("russian,english" "babel" t)
+     ("utf8" "inputenc" t)
+     ("T2A" "fontenc" nil))))
+ '(org-latex-pdf-process
+   (quote
+    ("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f")))
+ ;; '(purescript-mode-hook
+ ;;   (quote
+ ;;    (turn-on-purescript-indent turn-on-purescript-unicode-input-method)))
  '(scheme-program-name "mit-scheme"))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -105,8 +131,19 @@
 ;; (global-set-key (kbd "RET") 'newline)
 ;; (global-set-key (kbd "C-m") 'set-mark-command)
 
+;; pandoc-mode
+;; (load "pandoc-mode")
+;; (add-hook 'markdown-mode-hook 'pandoc-mode)
+;; (add-hook 'pandoc-mode-hook 'pandoc-load-default-settings)
+
+;; org-mode
+(require 'org)
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(setq org-log-done t)
+
 ;;; company-mode visual completion
-(add-hook 'haskell-mode-hook 'company-mode)
+;; (add-hook 'haskell-mode-hook 'company-mode)
 
 ;;; use a dedicated swap directory
 (setq backup-directory-alist
@@ -133,13 +170,14 @@
 (require 'haskell-process)
 (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
+;;; indentation
+(add-hook 'haskell-mode-hook 'haskell-indentation-mode)
+
 ; Make Emacs look in Cabal directory for binaries
 (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
   (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
   (add-to-list 'exec-path my-cabal-path))
 
-;;; indentation
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
 ;;; auto tags generation: hasktags must be installed
 (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
@@ -179,12 +217,15 @@
   '(progn
      (define-key haskell-mode-map (kbd "C-,") 'haskell-move-nested-left)
      (define-key haskell-mode-map (kbd "C-.") 'haskell-move-nested-right)))
+
 ;;; init ghc-mod
 (autoload 'ghc-init "ghc" nil t)
 (autoload 'ghc-debug "ghc" nil t)
 (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+
 ;;; linting with hlint
 (add-hook 'haskell-mode-hook 'flymake-hlint-load)
+
 ;;; jump to definition
 (define-key haskell-mode-map (kbd "M-.") 'haskell-mode-jump-to-def)
 
