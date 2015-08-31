@@ -9,7 +9,7 @@
 (package-initialize)
 
 (defvar packages-to-install
-  '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company shm paredit))
+  '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company shm paredit w3m))
 
 ;;; fetch the list of packages available
 (unless package-archive-contents
@@ -19,15 +19,6 @@
 (dolist (package packages-to-install)
   (unless (package-installed-p package)
     (package-install package)))
-
-;;; paredit
-(autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
-(add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
-(add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
-(add-hook 'ielm-mode-hook             #'enable-paredit-mode)
-(add-hook 'lisp-mode-hook             #'enable-paredit-mode)
-(add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
-(add-hook 'scheme-mode-hook           #'enable-paredit-mode)
 
 ;;; disable toolbar
 (tool-bar-mode -1)
@@ -47,147 +38,32 @@
 ;;; enable evil-mode by default
 (evil-mode 1)
 
-;;; indentation
-;; (add-to-list 'load-path "/path/to/structured-haskell-mode/elisp")
-;; (require 'shm)
-;; (add-hook 'haskell-mode-hook 'structured-haskell-mode)
-;; or
-
-;;; haskell-mode
-(require 'haskell-interactive-mode)
-(require 'haskell-process)
-(add-hook 'haskell-mode-hook 'haskell-indentation-mode)
-(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
-
-; Make Emacs look in Cabal directory for binaries
-(let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
-  (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
-  (add-to-list 'exec-path my-cabal-path))
-
-;;; auto tags generation: hasktags must be installed
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(add-to-list (quote org-latex-packages-alist) t)
- '(custom-safe-themes
-   (quote
-    ("1297a022df4228b81bc0436230f211bad168a117282c20ddcba2db8c6a200743" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "e16a771a13a202ee6e276d06098bc77f008b73bbac4d526f160faa2d76c1dd0e" default)))
- '(global-auto-revert-non-file-buffers t)
- '(haskell-process-auto-import-loaded-modules t)
- '(haskell-process-log t)
- '(haskell-process-suggest-remove-import-lines t)
- '(haskell-process-type (quote cabal-repl))
- '(haskell-tags-on-save t)
- '(magit-auto-revert-mode nil)
- '(org-beamer-frame-default-options "")
- '(org-latex-create-formula-image-program (quote dvipng))
- '(org-latex-packages-alist
-   (quote
-    (("" "cmap" t)
-     ("russian,english" "babel" t)
-     ("utf8" "inputenc" t)
-     ("T2A" "fontenc" nil))))
- '(org-latex-pdf-process
-   (quote
-    ("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f")))
- '(purescript-mode-hook
-   (quote
-    (turn-on-purescript-indentation turn-on-purescript-unicode-input-method)))
- '(scheme-program-name "mit-scheme"))
-
-;;; haskell-mode hotkeys
-
-(eval-after-load 'haskell-mode '(progn
-  (define-key haskell-mode-map (kbd "C-'") 'haskell-interactive-bring)
-  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
-  (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
-  (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
-  ;; (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
-  (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)))
-
-(eval-after-load 'haskell-cabal '(progn
-  (define-key haskell-cabal-mode-map (kbd "C-'") 'haskell-interactive-bring)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
-;;; use cabal repl(cabal 1.18+)
-
-;;; hoogle import search
-;;; requires hoogle binary
-;; (custom-set-variables
-;;   '(haskell-process-suggest-hoogle-imports t))
-
-;;; contextual space -- sucks :(
-;; (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
-
-;;; nested block indenting
-(eval-after-load "haskell-mode"
-  '(progn
-     (define-key haskell-mode-map (kbd "C-,") 'haskell-move-nested-left)
-     (define-key haskell-mode-map (kbd "C-.") 'haskell-move-nested-right)))
-
-;;; init ghc-mod
-(autoload 'ghc-init "ghc" nil t)
-(autoload 'ghc-debug "ghc" nil t)
-(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
-
-;;; linting with hlint
-(add-hook 'haskell-mode-hook 'flymake-hlint-load)
-
-;;; aligner rules
-(add-hook 'align-load-hook (lambda ()
-  ((add-to-list 'align-rules-list
-               '(haskell-types
-                 (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-assignment
-                 (regexp . "\\(\\s-+\\)=\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-arrows
-                 (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-left-arrows
-                 (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode)))))))
-
-;;; navigate imports
-(define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-navigate-imports)
-
-;;; module templater
-(add-hook 'haskell-mode-hook 'haskell-auto-insert-module-template)
-
-
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-;;; setting default color theme
-(load-theme 'solarized-dark)
-
 ;;; enable line numbers
 (global-linum-mode 1)
 
 ;;; enable show brackets mode
 (show-paren-mode 1)
-
+ 
 ;;; show cursor's position
 (column-number-mode 1)
 
 ;;; use ido mode
 (require 'ido)
 (ido-mode t)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 
 ;;; comments toggler
 ;;; http://www.emacswiki.org/emacs/CommentingCode
@@ -205,104 +81,124 @@
                       (end-of-line)
                       (point))))
         (comment-or-uncomment-region start end)))
-(global-set-key (kbd "M-;") 'toggle-comment)
 
 ;;; evil-nerd-commenter
 (evilnc-default-hotkeys)
 
-;;; set font size
-(set-face-attribute 'default nil :height 150)
+;;; ========================
+;;; global keyboard bindings
+;;; ========================
 
-;;; super-tab
-(global-set-key (kbd "TAB") 'hippie-expand)
+;;; requires 'toggle-comment
+(global-set-key (kbd "M-;") 'toggle-comment)
 
-;;; electric enabled by default
-;;; provides indentation on RET
-(electric-indent-mode +1)
-
-;;; use only tabs for indentation
-(setq-default indent-tabs-mode nil)
-
-;;; C-SPC won't work on OS X, so use C-m instead
-;;; but first, we need to unbind RET from C-m
-;; (global-set-key (kbd "RET") 'newline)
-;; (global-set-key (kbd "C-m") 'set-mark-command)
-
-;; pandoc-mode
-;; (load "pandoc-mode")
-;; (add-hook 'markdown-mode-hook 'pandoc-mode)
-;; (add-hook 'pandoc-mode-hook 'pandoc-load-default-settings)
-
-;; org-mode
-(require 'org)
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
-(setq org-log-done t)
-
-;;; company-mode visual completion
-(add-hook 'haskell-mode-hook 'company-mode)
-
-;;; use a dedicated swap directory
-(setq backup-directory-alist
-   `(("." . "~/.backup/emacs/")))
-(setq backup-by-copying t) ;;; may be slow, but it's safe and ok with SSD
-
-;;; use a dedicated temp files directory
-(setq auto-save-file-name-transforms
-   `((".*" ,(concat user-emacs-directory "auto-save/") t)))
-
-;;; automatically reload buffers from files
-(global-auto-revert-mode t)
-
-;;; align around regex
+;;; align by regexp
 (global-set-key (kbd "C-x a r") 'align-regexp)
 
-;;; summon magit
-(global-set-key (kbd "C-x g") 'magit-status)
+;;; =====
+;;; paths
+;;; =====
 
-;;; erlang-mode
+;;; Nix bin
+(add-to-list 'exec-path "/Users/dr/.nix-profile/bin")
+;;; Opam
+(add-to-list 'exec-path "/Users/dr/.opam/system/bin")
+;;; Cabal
+(add-to-list 'exec-path "/Users/dr/.cabal/bin")
 
-;;; disable electric commands
-(setq erlang-electric-commands '())
+;;; =======
+;;; haskell
+;;; =======
+
+;;; -----------
+;;; indentation
+;;; -----------
+
+;;; haskell indentation
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+
+;;; block indentation
+(eval-after-load "haskell-mode"
+  '(progn
+     (define-key haskell-mode-map (kbd "C-,") 'haskell-move-nested-left)
+     (define-key haskell-mode-map (kbd "C-.") 'haskell-move-nested-right)))
+
+;;; ----------------
+;;; interactive mode
+;;; ----------------
+
+;;; enable it
+(require 'haskell-interactive-mode)
+(require 'haskell-process)
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+
+;;; logger and import remover
+(custom-set-variables
+  '(haskell-process-suggest-remove-import-lines t)
+  '(haskell-process-auto-import-loaded-modules t)
+  '(haskell-process-log t))
+
+;;; handy keys
+(define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+(define-key haskell-mode-map (kbd "C-'") 'haskell-interactive-bring)
+(define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
+(define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
+(define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+(define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+(define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
+(define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
+
+;;; cabal-mode keys
+(define-key haskell-cabal-mode-map (kbd "C-'") 'haskell-interactive-bring)
+(define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+(define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+(define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
+
+;;; make cabal-repl default interactive shell
+(custom-set-variables '(haskell-process-type 'cabal-repl))
+
+;;; --------
+;;; hasktags
+;;; --------
 
 ;;; jump to definition
-(define-key haskell-mode-map (kbd "M-.") 'haskell-mode-jump-to-def)
+;;;
+;;; to troubleshoot/reset use 'M-x tags-reset-tags-tables'
+(define-key haskell-mode-map (kbd "M-.") 'haskell-mode-jump-to-def-or-tag)
 
-;;; enabling disabled features
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
+;;; refresh tags on save
+(custom-set-variables '(haskell-tags-on-save t))
 
-;;; slime
-;; Set your lisp system and, optionally, some contribs
-(setq inferior-lisp-program "/usr/local/bin/sbcl")
-(setq slime-contribs '(slime-fancy))
+;;; ------------------
+;;; haddock w3m viewer
+;;; ------------------
 
+;;; make w3m more passive
+(setq w3m-mode-map (make-sparse-keymap))
 
-;;; toggle horizontal/vertical split
+(define-key w3m-mode-map (kbd "RET") 'w3m-view-this-url)
+(define-key w3m-mode-map (kbd "q") 'bury-buffer)
+(define-key w3m-mode-map (kbd "<mouse-1>") 'w3m-maybe-url)
+(define-key w3m-mode-map [f5] 'w3m-reload-this-page)
+(define-key w3m-mode-map (kbd "C-c C-d") 'haskell-w3m-open-haddock)
+(define-key w3m-mode-map (kbd "M-<left>") 'w3m-view-previous-page)
+(define-key w3m-mode-map (kbd "M-<right>") 'w3m-view-next-page)
+(define-key w3m-mode-map (kbd "M-.") 'w3m-haddock-find-tag)
 
-(defun toggle-window-split ()
+(defun w3m-maybe-url ()
   (interactive)
-  (if (= (count-windows) 2)
-      (let* ((this-win-buffer (window-buffer))
-	     (next-win-buffer (window-buffer (next-window)))
-	     (this-win-edges (window-edges (selected-window)))
-	     (next-win-edges (window-edges (next-window)))
-	     (this-win-2nd (not (and (<= (car this-win-edges)
-					 (car next-win-edges))
-				     (<= (cadr this-win-edges)
-					 (cadr next-win-edges)))))
-	     (splitter
-	      (if (= (car this-win-edges)
-		     (car (window-edges (next-window))))
-		  'split-window-horizontally
-		'split-window-vertically)))
-	(delete-other-windows)
-	(let ((first-win (selected-window)))
-	  (funcall splitter)
-	  (if this-win-2nd (other-window 1))
-	  (set-window-buffer (selected-window) this-win-buffer)
-	  (set-window-buffer (next-window) next-win-buffer)
-	  (select-window first-win)
-	  (if this-win-2nd (other-window 1))))))
+  (if (or (equal '(w3m-anchor) (get-text-property (point) 'face))
+          (equal '(w3m-arrived-anchor) (get-text-property (point) 'face)))
+      (w3m-view-this-url)))
 
-(global-set-key (kbd "C-x \\") 'toggle-window-split)
+;;; enable it
+(require 'w3m-haddock)
+
+;;; hook it
+(add-hook 'w3m-display-hook 'w3m-haddock-display)
+
+;;; map key
+(define-key haskell-mode-map (kbd "C-c C-d") 'haskell-w3m-open-haddock)
+
+;;; speedbar
+;(speedbar-add-supported-extension ".hs")
