@@ -1,12 +1,3 @@
-;;; disable toolbar
-(tool-bar-mode -1)
-
-;;; enables gemacs to start in front of terminal multiplexor
-(x-focus-frame nil)
-
-;; line wrap everywhere
-(global-visual-line-mode t)
-
 ;;; package manager initialization
 (require 'package)
 (add-to-list 'package-archives
@@ -14,20 +5,11 @@
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 
-(defvar packages-to-install
-             '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company))
-
 ;;; activate all the packages (in particular autoloads)
 (package-initialize)
 
-;;; cyrillic layout
-;; (setq set-input-method "cyrillic-yawerty")
-
-;;; org mode
-(require 'org)
-
-;;; enable evil-mode by default
-(evil-mode 1)
+(defvar packages-to-install
+  '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit git-rebase-mode git-commit-mode pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company shm paredit))
 
 ;;; fetch the list of packages available
 (unless package-archive-contents
@@ -38,6 +20,51 @@
   (unless (package-installed-p package)
     (package-install package)))
 
+;;; paredit
+(autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+(add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
+(add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
+(add-hook 'ielm-mode-hook             #'enable-paredit-mode)
+(add-hook 'lisp-mode-hook             #'enable-paredit-mode)
+(add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
+(add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+
+;;; disable toolbar
+(tool-bar-mode -1)
+
+;;; enables gemacs to start in front of terminal multiplexor
+(x-focus-frame nil)
+
+;; line wrap everywhere
+(global-visual-line-mode t)
+
+;;; cyrillic layout
+;; (setq set-input-method "cyrillic-yawerty")
+
+;;; org mode
+(require 'org)
+
+;;; enable evil-mode by default
+(evil-mode 1)
+
+;;; indentation
+;; (add-to-list 'load-path "/path/to/structured-haskell-mode/elisp")
+;; (require 'shm)
+;; (add-hook 'haskell-mode-hook 'structured-haskell-mode)
+;; or
+
+;;; haskell-mode
+(require 'haskell-interactive-mode)
+(require 'haskell-process)
+(add-hook 'haskell-mode-hook 'haskell-indentation-mode)
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+
+; Make Emacs look in Cabal directory for binaries
+(let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
+  (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
+  (add-to-list 'exec-path my-cabal-path))
+
+;;; auto tags generation: hasktags must be installed
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -53,6 +80,7 @@
  '(haskell-process-suggest-remove-import-lines t)
  '(haskell-process-type (quote cabal-repl))
  '(haskell-tags-on-save t)
+ '(magit-auto-revert-mode nil)
  '(org-beamer-frame-default-options "")
  '(org-latex-create-formula-image-program (quote dvipng))
  '(org-latex-packages-alist
@@ -66,8 +94,77 @@
     ("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f")))
  '(purescript-mode-hook
    (quote
-    (turn-on-purescript-indent turn-on-purescript-unicode-input-method)))
+    (turn-on-purescript-indentation turn-on-purescript-unicode-input-method)))
  '(scheme-program-name "mit-scheme"))
+
+;;; haskell-mode hotkeys
+
+(eval-after-load 'haskell-mode '(progn
+  (define-key haskell-mode-map (kbd "C-'") 'haskell-interactive-bring)
+  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+  (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+  (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
+  (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
+  ;; (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
+  (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+  (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+
+(eval-after-load 'haskell-cabal '(progn
+  (define-key haskell-cabal-mode-map (kbd "C-'") 'haskell-interactive-bring)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+;;; use cabal repl(cabal 1.18+)
+
+;;; hoogle import search
+;;; requires hoogle binary
+;; (custom-set-variables
+;;   '(haskell-process-suggest-hoogle-imports t))
+
+;;; contextual space -- sucks :(
+;; (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
+
+;;; nested block indenting
+(eval-after-load "haskell-mode"
+  '(progn
+     (define-key haskell-mode-map (kbd "C-,") 'haskell-move-nested-left)
+     (define-key haskell-mode-map (kbd "C-.") 'haskell-move-nested-right)))
+
+;;; init ghc-mod
+(autoload 'ghc-init "ghc" nil t)
+(autoload 'ghc-debug "ghc" nil t)
+(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+
+;;; linting with hlint
+(add-hook 'haskell-mode-hook 'flymake-hlint-load)
+
+;;; aligner rules
+(add-hook 'align-load-hook (lambda ()
+  ((add-to-list 'align-rules-list
+               '(haskell-types
+                 (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-assignment
+                 (regexp . "\\(\\s-+\\)=\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-arrows
+                 (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-left-arrows
+                 (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode)))))))
+
+;;; navigate imports
+(define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-navigate-imports)
+
+;;; module templater
+(add-hook 'haskell-mode-hook 'haskell-auto-insert-module-template)
+
+
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -143,7 +240,7 @@
 (setq org-log-done t)
 
 ;;; company-mode visual completion
-;; (add-hook 'haskell-mode-hook 'company-mode)
+(add-hook 'haskell-mode-hook 'company-mode)
 
 ;;; use a dedicated swap directory
 (setq backup-directory-alist
@@ -160,71 +257,13 @@
 ;;; align around regex
 (global-set-key (kbd "C-x a r") 'align-regexp)
 
+;;; summon magit
+(global-set-key (kbd "C-x g") 'magit-status)
+
 ;;; erlang-mode
 
 ;;; disable electric commands
 (setq erlang-electric-commands '())
-
-;;; haskell-mode
-(require 'haskell-interactive-mode)
-(require 'haskell-process)
-(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
-
-;;; indentation
-(add-hook 'haskell-mode-hook 'haskell-indentation-mode)
-
-; Make Emacs look in Cabal directory for binaries
-(let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
-  (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
-  (add-to-list 'exec-path my-cabal-path))
-
-
-;;; auto tags generation: hasktags must be installed
-(let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
-  (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
-  (add-to-list 'exec-path my-cabal-path))
-
-;;; haskell-mode hotkeys
-
-(eval-after-load 'haskell-mode '(progn
-  (define-key haskell-mode-map (kbd "C-'") 'haskell-interactive-bring)
-  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
-  (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
-  (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
-  ;; (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
-  (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)))
-
-(eval-after-load 'haskell-cabal '(progn
-  (define-key haskell-cabal-mode-map (kbd "C-'") 'haskell-interactive-bring)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
-;;; use cabal repl(cabal 1.18+)
-
-;;; hoogle import search
-;;; requires hoogle binary
-;; (custom-set-variables
-;;   '(haskell-process-suggest-hoogle-imports t))
-
-;;; contextual space -- sucks :(
-;; (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
-
-;;; nested block indenting
-(eval-after-load "haskell-mode"
-  '(progn
-     (define-key haskell-mode-map (kbd "C-,") 'haskell-move-nested-left)
-     (define-key haskell-mode-map (kbd "C-.") 'haskell-move-nested-right)))
-
-;;; init ghc-mod
-(autoload 'ghc-init "ghc" nil t)
-(autoload 'ghc-debug "ghc" nil t)
-(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
-
-;;; linting with hlint
-(add-hook 'haskell-mode-hook 'flymake-hlint-load)
 
 ;;; jump to definition
 (define-key haskell-mode-map (kbd "M-.") 'haskell-mode-jump-to-def)
@@ -232,31 +271,6 @@
 ;;; enabling disabled features
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
-
-;;; aligner rules
-(add-hook 'align-load-hook (lambda ()
-  ((add-to-list 'align-rules-list
-               '(haskell-types
-                 (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-assignment
-                 (regexp . "\\(\\s-+\\)=\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-arrows
-                 (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-left-arrows
-                 (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode)))))))
-
-;;; navigate imports
-(define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-navigate-imports)
-
-;;; module templater
-(add-hook 'haskell-mode-hook 'haskell-auto-insert-module-template)
 
 ;;; slime
 ;; Set your lisp system and, optionally, some contribs
