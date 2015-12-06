@@ -265,3 +265,6 @@
 
 ;;; increase gc memory threshold to 20Mb
 (setq gc-cons-threshold 20000000)
+
+;;; enable proof general
+(load-file "$HOME/.emacs.d/lib/ProofGeneral-4.2/generic/proof-site.el")
