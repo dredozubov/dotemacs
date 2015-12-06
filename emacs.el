@@ -29,6 +29,9 @@
 ;; line wrap everywhere
 (global-visual-line-mode t)
 
+;; automatic reverting
+(global-auto-revert-mode)
+
 ;;; cyrillic layout
 ;; (setq set-input-method "cyrillic-yawerty")
 
@@ -43,7 +46,7 @@
 
 ;;; enable show brackets mode
 (show-paren-mode 1)
- 
+
 ;;; show cursor's position
 (column-number-mode 1)
 
@@ -55,9 +58,15 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes (quote (tango-dark)))
  '(custom-safe-themes
    (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default))))
+    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+ '(haskell-process-auto-import-loaded-modules t)
+ '(haskell-process-log t)
+ '(haskell-process-suggest-remove-import-lines t)
+ '(haskell-process-type (quote stack-ghci))
+ '(haskell-tags-on-save t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -94,6 +103,9 @@
 
 ;;; align by regexp
 (global-set-key (kbd "C-x a r") 'align-regexp)
+
+;;; switch windows by S-arrow
+(windmove-default-keybindings)
 
 ;;; =====
 ;;; paths
@@ -133,10 +145,7 @@
 (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
 ;;; logger and import remover
-(custom-set-variables
-  '(haskell-process-suggest-remove-import-lines t)
-  '(haskell-process-auto-import-loaded-modules t)
-  '(haskell-process-log t))
+
 
 ;;; handy keys
 (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
@@ -146,6 +155,7 @@
 (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
 (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
 (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
+(define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-navigate-imports-go)
 (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
 
 ;;; cabal-mode keys
@@ -154,8 +164,10 @@
 (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
 (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
 
+;;; make stack ghci default interactive shell
+
 ;;; make cabal-repl default interactive shell
-(custom-set-variables '(haskell-process-type 'cabal-repl))
+;;; (custom-set-variables '(haskell-process-type 'cabal-repl))
 
 ;;; --------
 ;;; hasktags
@@ -164,10 +176,10 @@
 ;;; jump to definition
 ;;;
 ;;; to troubleshoot/reset use 'M-x tags-reset-tags-tables'
-(define-key haskell-mode-map (kbd "M-.") 'haskell-mode-jump-to-def-or-tag)
+(define-key haskell-mode-map (kbd "C-M-.") 'haskell-mode-jump-to-def-or-tag)
 
 ;;; refresh tags on save
-(custom-set-variables '(haskell-tags-on-save t))
+
 
 ;;; ------------------
 ;;; haddock w3m viewer
@@ -202,3 +214,54 @@
 
 ;;; speedbar
 ;(speedbar-add-supported-extension ".hs")
+
+;;; magit
+(global-set-key (kbd "C-x g") 'magit-status)
+
+;;;;;;;;;;;;;;;;;;
+;;; postgresql ;;;
+;;;;;;;;;;;;;;;;;;
+
+(setq sql-connection-alist
+  '((avia246-dev (sql-product 'postgres)
+    (sql-port 5432)
+    (sql-server "localhost")
+    (sql-user "avia")
+    (sql-password "password")
+    (sql-database "avia24_6_development"))
+  (avia246-test (sql-product 'postgres)
+    (sql-port 5432)
+    (sql-server "localhost")
+    (sql-user "avia")
+    (sql-password "password")
+    (sql-database "avia24_6_test"))))
+
+(defun sql-avia246-dev ()
+  (interactive)
+  (custom-sql-connect 'postgres 'avia246-dev))
+
+(defun sql-avia246-test ()
+  (interactive)
+  (custom-sql-connect 'postgres 'avia246-test))
+
+(defun custom-sql-connect (product connection)
+  (interactive)
+  ;; remember to set the sql-product, otherwise, it will fail for the first time
+  ;; you call the function
+  (setq sql-product product)
+  (sql-connect connection))
+
+(defun psql-scratch ()
+  (interactive)
+  (switch-to-buffer "*sql-scratch*")
+  (sql-set-product "postgres")
+  (sql-set-sqli-buffer)
+  (sql-mode))
+
+;;; truncate lines
+(add-hook 'sql-interactive-mode-hook
+  (lambda ()
+    (toggle-truncate-lines t)))
+
+;;; increase gc memory threshold to 20Mb
+(setq gc-cons-threshold 20000000)
