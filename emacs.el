@@ -271,8 +271,8 @@
 (load-file "$HOME/.emacs.d/lib/ProofGeneral-4.2/generic/proof-site.el")
 
 ;;; proof general tag completion
-(add-hook ’proof-mode-hook
-     (lambda () (local-set-key ’(meta tab) ’tag-complete-symbol)))
+;(add-hook ’proof-mode-hook
+;  (lambda () (local-set-key ’(meta tab) ’tag-complete-symbol)))
 
 ;;; john wigley coq setup ripoff
 (defcustom coq-use-Case t
