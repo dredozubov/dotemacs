@@ -58,6 +58,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(coq-compile-before-require t)
  '(custom-enabled-themes (quote (tango-dark)))
  '(custom-safe-themes
    (quote
@@ -112,7 +113,7 @@
 ;;; =====
 
 ;;; Nix bin
-(add-to-list 'exec-path "/Users/dr/.nix-profile/bin")
+;; (add-to-list 'exec-path "/Users/dr/.nix-profile/bin")
 ;;; Opam
 (add-to-list 'exec-path "/Users/dr/.opam/system/bin")
 ;;; Cabal
@@ -265,3 +266,84 @@
 
 ;;; increase gc memory threshold to 20Mb
 (setq gc-cons-threshold 20000000)
+
+;;; enable proof general
+(load-file "$HOME/.emacs.d/lib/ProofGeneral-4.2/generic/proof-site.el")
+
+;;; proof general tag completion
+(add-hook ’proof-mode-hook
+     (lambda () (local-set-key ’(meta tab) ’tag-complete-symbol)))
+
+;;; john wigley coq setup ripoff
+(defcustom coq-use-Case t
+  "Whether to use the Case hack for constructor alternatives."
+  :type 'boolean
+  :group 'coq-config)
+
+(defcustom coq-use-bullets t
+  "Whether to use bullets for scoping constructor alternatives."
+  :type 'boolean
+  :group 'coq-config)
+
+(defun coq-insert-induction (name pos)
+  "Given the name of a variable in scope, insert induction cases for it."
+  (interactive "sInduction over term: ")
+  (proof-shell-ready-prover)
+  (let* ((leader
+          (save-excursion
+            (beginning-of-line)
+            (let ((beg (point)))
+              (skip-syntax-forward " ")
+              (- (point) beg))))
+         (thetype
+          (ignore-errors
+            (with-temp-buffer
+              (insert (proof-shell-invisible-cmd-get-result
+                       (concat "Check " name ".")))
+              (goto-char (point-max))
+              (skip-syntax-backward " ")
+              (delete-region (point) (point-max))
+              (search-backward " : ")
+              (delete-region (point-min) (match-end 0))
+              (goto-char (point-min))
+              (forward-word 1)
+              (buffer-substring (point-min) (point)))))
+         (indstr
+          (ignore-errors
+            (with-temp-buffer
+              (insert (proof-shell-invisible-cmd-get-result
+                       (concat "Show Match " thetype ".")))
+              (goto-char (point-min))
+              (let (ctors)
+                (while (re-search-forward "| \\(.+?\\) =>" nil t)
+                  (push (match-string 1) ctors))
+                (goto-char (point-min))
+                (re-search-forward "| \\S-+ ")
+                (delete-region (point-min) (point))
+                (insert "[")
+                (while (re-search-forward "=>\\(.\\|\n\\)+?| \\S-+ " nil t)
+                  (replace-match "|"))
+                (goto-char (point-max))
+                (search-backward "=>" nil t)
+                (delete-region (point) (point-max))
+                (insert "].")
+                (mapc #'(lambda (x)
+                          (insert ?\n (make-string leader ? ))
+                          (when coq-use-bullets
+                            (insert "- "))
+                          (when coq-use-Case
+                            (insert (format "Case \"%s = %s\"." name x))))
+                      (nreverse ctors))
+                (buffer-string))))))
+    indstr))
+;;; remove trailing spaces
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;; winner(undo last window split/unsplit)
+;;; C-c <left> and C-C <right> - undo/redo
+(winner-mode 1)
+
+;;; visual line length aid
+(require 'whitespace)
+(setq whitespace-style '(face empty tabs lines-tail trailing))
+(global-whitespace-mode t)
