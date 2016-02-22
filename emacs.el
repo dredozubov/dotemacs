@@ -268,7 +268,7 @@
 (setq gc-cons-threshold 20000000)
 
 ;;; enable proof general
-(load-file "$HOME/.emacs.d/lib/ProofGeneral-4.2/generic/proof-site.el")
+(load-file "$HOME/.emacs.d/lib/PG/generic/proof-site.el")
 
 ;;; proof general tag completion
 ;(add-hook ’proof-mode-hook
