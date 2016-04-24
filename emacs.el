@@ -9,7 +9,7 @@
 (package-initialize)
 
 (defvar packages-to-install
-  '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company shm paredit w3m))
+  '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company shm paredit w3m company-coq company-ansible))
 
 ;;; fetch the list of packages available
 (unless package-archive-contents
@@ -336,6 +336,10 @@
                       (nreverse ctors))
                 (buffer-string))))))
     indstr))
+
+;; Load company-coq when opening Coq files
+(add-hook 'coq-mode-hook #'company-coq-mode)
+
 ;;; remove trailing spaces
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
@@ -347,3 +351,7 @@
 (require 'whitespace)
 (setq whitespace-style '(face empty tabs lines-tail trailing))
 (global-whitespace-mode t)
+
+;;; agda-mode
+(load-file (let ((coding-system-for-read 'utf-8))
+                (shell-command-to-string "agda-mode locate")))
