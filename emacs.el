@@ -58,6 +58,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(agda2-highlight-face-groups (quote default-faces))
  '(coq-compile-before-require t)
  '(custom-enabled-themes (quote (tango-dark)))
  '(custom-safe-themes
