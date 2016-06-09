@@ -264,8 +264,8 @@
   (lambda ()
     (toggle-truncate-lines t)))
 
-;;; increase gc memory threshold to 20Mb
-(setq gc-cons-threshold 20000000)
+;;; increase gc memory threshold to 40Mb
+(setq gc-cons-threshold 40000000)
 
 ;;; enable proof general
 (load-file "$HOME/.emacs.d/lib/PG/generic/proof-site.el")
