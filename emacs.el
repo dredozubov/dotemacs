@@ -158,7 +158,6 @@
 (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
 (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
 (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-navigate-imports-go)
-(define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)
 
 ;;; cabal-mode keys
 (define-key haskell-cabal-mode-map (kbd "C-'") 'haskell-interactive-bring)
