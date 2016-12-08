@@ -9,7 +9,7 @@
 (package-initialize)
 
 (defvar packages-to-install
-  '(evil evil-args evil-jumper evil-nerd-commenter slime edts auto-highlight-symbol auto-complete eproject erlang f flycheck-haskell flycheck flymake ghci-completion grizzl haskell-mode helm async magit pkg-info epl popup rust-mode s smart-tab smartparens solarized-theme dash org org-ac markdown-mode pandoc-mode ox-pandoc ox-reveal org-pandoc psci purescript-mode company shm paredit w3m company-coq company-ansible))
+  '(helm-git helm-git helm-git-grep helm-core async helm-git-grep helm-descbinds helm helm-core async popup async helm-descbinds helm-ag helm helm-core async popup async helm-ag helm-ispell helm-core async helm-company company helm helm-core async popup async helm-company company-ansible company company-coq dash yasnippet company company-math math-symbol-lists company company-ghc ghc haskell-mode company company-math math-symbol-lists company deferred docker json-mode json-snatcher json-reformat tablist s magit-popup dash async docker-tramp dash docker-tramp dockerfile-mode edts s popup f dash s erlang eproject helm helm-core async popup async dash auto-highlight-symbol auto-complete popup eproject helm helm-core async popup async erlang evil-args evil goto-chg undo-tree evil-jumper evil goto-chg undo-tree evil-magit magit magit-popup dash async git-commit with-editor dash async dash with-editor dash async dash async evil goto-chg undo-tree evil-nerd-commenter flycheck-haskell let-alist seq dash haskell-mode flycheck seq let-alist pkg-info epl dash flycheck-plantuml plantuml-mode flycheck seq let-alist pkg-info epl dash gh-md ghc haskell-mode ghci-completion goto-chg grizzl helm-idris idris-mode prop-menu helm helm-core async popup async hindent idris-mode prop-menu import-popwin popwin interaction-log intero haskell-mode company flycheck seq let-alist pkg-info epl dash json-mode json-snatcher json-reformat json-reformat json-snatcher let-alist magit magit-popup dash async git-commit with-editor dash async dash with-editor dash async dash async magit-popup dash async markdown-mode math-symbol-lists nix-mode ob-diagrams org-ac yaxception log4e auto-complete-pcmp yaxception log4e auto-complete popup org-babel-eval-in-repl eval-in-repl ace-window avy paredit dash org-pandoc ox-pandoc ht dash dash org ox-reveal org pandoc-mode dash hydra paredit pkg-info epl plantuml-mode popup popwin prop-menu psci f dash s s dash purescript-mode purescript-mode rust-mode s seq shm slime macrostep smart-tab smartparens dash sml-mode solarized-theme dash tablist undo-tree w3m with-editor dash async yasnippet yaxception))
 
 ;;; fetch the list of packages available
 (unless package-archive-contents
@@ -36,7 +36,7 @@
 ;; (setq set-input-method "cyrillic-yawerty")
 
 ;;; org mode
-(require 'org)
+(require 'org-install)
 
 ;;; enable evil-mode by default
 (evil-mode 1)
@@ -64,6 +64,9 @@
  '(custom-safe-themes
    (quote
     ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+ '(haskell-indentation-left-offset 0)
+ '(haskell-indentation-starter-offset 0)
+ '(haskell-indentation-where-post-offset 0)
  '(haskell-process-auto-import-loaded-modules t)
  '(haskell-process-log t)
  '(haskell-process-suggest-remove-import-lines t)
@@ -142,15 +145,16 @@
 ;;; ----------------
 
 ;;; enable it
+(require 'haskell-mode)
+(require 'hindent)
+(require 'haskell)
 (require 'haskell-interactive-mode)
 (require 'haskell-process)
 (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
-;;; logger and import remover
-
-
 ;;; handy keys
 (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+(define-key haskell-mode-map (kbd "C-c C-.") 'haskell-mode-format-imports)
 (define-key haskell-mode-map (kbd "C-'") 'haskell-interactive-bring)
 (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
 (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
@@ -164,6 +168,44 @@
 (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
 (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
 (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
+
+;;; find call sites
+(define-key interactive-haskell-mode-map (kbd "M-,") 'haskell-who-calls)
+(defun haskell-who-calls (&optional prompt)
+  "Grep the codebase to see who uses the symbol at point."
+  (interactive "P")
+  (let ((sym (if prompt
+                 (read-from-minibuffer "Look for: ")
+               (haskell-ident-at-point))))
+    (let ((existing (get-buffer "*who-calls*")))
+      (when existing
+        (kill-buffer existing)))
+    (cond
+     ;; Use grep
+     (nil (let ((buffer
+                 (grep-find (format "cd %s && find . -name '*.hs' -exec grep -inH -e %s {} +"
+                                    (haskell-session-current-dir (haskell-session))
+                                    sym))))
+            (with-current-buffer buffer
+              (rename-buffer "*who-calls*")
+              (switch-to-buffer-other-window buffer))))
+     ;; Use ag
+     (t (ag-files sym
+                  "\\.hs$"
+                  (haskell-session-current-dir (haskell-session)))))))
+
+;;; random crap
+(define-key interactive-haskell-mode-map [f5] 'haskell-process-load-or-reload)
+(define-key interactive-haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
+(define-key interactive-haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+(define-key interactive-haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+(define-key interactive-haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
+(define-key interactive-haskell-mode-map (kbd "M-.") 'haskell-mode-goto-loc)
+(define-key interactive-haskell-mode-map (kbd "C-?") 'haskell-mode-find-uses)
+(define-key interactive-haskell-mode-map (kbd "C-c C-t") 'haskell-mode-show-type-at)
+
+;;; hindent
+(define-key haskell-mode-map (kbd "C-c i") 'hindent/reformat-decl)
 
 ;;; make stack ghci default interactive shell
 
@@ -355,3 +397,64 @@
 ;;; agda-mode
 (load-file (let ((coding-system-for-read 'utf-8))
                 (shell-command-to-string "agda-mode locate")))
+
+;; active Org-babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(;; other Babel languages
+   (plantuml . t)
+   (R . t)))
+
+(setq org-plantuml-jar-path
+            (expand-file-name "/usr/local/Cellar/plantuml/8048/libexec/plantuml.jar"))
+
+(setq org-latex-listings 'minted)
+
+(require 'idris-mode)
+(add-to-list 'completion-ignored-extensions ".ibc")
+(idris-define-evil-keys)
+
+;; helm
+(require 'helm)
+(require 'helm-config)
+(global-set-key (kbd "M-x") #'helm-M-x)
+(setq helm-M-x-fuzzy-match t) ;; optional fuzzy matching for helm-M-x
+;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
+;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
+;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
+(global-set-key (kbd "C-c h") 'helm-command-prefix)
+(global-unset-key (kbd "C-x c"))
+
+(global-set-key (kbd "C-x b") 'helm-mini)
+(setq helm-buffers-fuzzy-matching t
+      helm-recentf-fuzzy-match    t)
+
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
+(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
+(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+
+(setq helm-autoresize-max-height 0)
+(setq helm-autoresize-min-height 20)
+(helm-autoresize-mode 1)
+
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
+
+(global-set-key (kbd "C-c h o") 'helm-occur)
+
+(setq helm-lisp-fuzzy-completion t)
+
+(helm-mode 1)
+
+(global-set-key (kbd "C-c g") 'helm-git-grep)
+
+(require 'helm-descbinds)
+(helm-descbinds-mode)
+
+;; enable intero
+(add-hook 'haskell-mode-hook 'intero-mode)
+
+;; helm-company
+(eval-after-load 'company
+  '(progn
+     (define-key company-mode-map (kbd "C-:") 'helm-company)
+     (define-key company-active-map (kbd "C-:") 'helm-company)))
