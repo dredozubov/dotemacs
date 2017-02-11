@@ -9,7 +9,7 @@
 (package-initialize)
 
 (defvar packages-to-install
-  '(helm-git helm-git helm-git-grep helm-core async helm-git-grep helm-descbinds helm helm-core async popup async helm-descbinds helm-ag helm helm-core async popup async helm-ag helm-ispell helm-core async helm-company company helm helm-core async popup async helm-company company-ansible company company-coq dash yasnippet company company-math math-symbol-lists company company-ghc ghc haskell-mode company company-math math-symbol-lists company deferred docker json-mode json-snatcher json-reformat tablist s magit-popup dash async docker-tramp dash docker-tramp dockerfile-mode edts s popup f dash s erlang eproject helm helm-core async popup async dash auto-highlight-symbol auto-complete popup eproject helm helm-core async popup async erlang evil-args evil goto-chg undo-tree evil-jumper evil goto-chg undo-tree evil-magit magit magit-popup dash async git-commit with-editor dash async dash with-editor dash async dash async evil goto-chg undo-tree evil-nerd-commenter flycheck-haskell let-alist seq dash haskell-mode flycheck seq let-alist pkg-info epl dash flycheck-plantuml plantuml-mode flycheck seq let-alist pkg-info epl dash gh-md ghc haskell-mode ghci-completion goto-chg grizzl helm-idris idris-mode prop-menu helm helm-core async popup async hindent idris-mode prop-menu import-popwin popwin interaction-log intero haskell-mode company flycheck seq let-alist pkg-info epl dash json-mode json-snatcher json-reformat json-reformat json-snatcher let-alist magit magit-popup dash async git-commit with-editor dash async dash with-editor dash async dash async magit-popup dash async markdown-mode math-symbol-lists nix-mode ob-diagrams org-ac yaxception log4e auto-complete-pcmp yaxception log4e auto-complete popup org-babel-eval-in-repl eval-in-repl ace-window avy paredit dash org-pandoc ox-pandoc ht dash dash org ox-reveal org pandoc-mode dash hydra paredit pkg-info epl plantuml-mode popup popwin prop-menu psci f dash s s dash purescript-mode purescript-mode rust-mode s seq shm slime macrostep smart-tab smartparens dash sml-mode solarized-theme dash tablist undo-tree w3m with-editor dash async yasnippet yaxception))
+  '(helm-git helm-git helm-git-grep helm-core async helm-git-grep helm-descbinds helm helm-core async popup async helm-descbinds helm-ag helm helm-core async popup async helm-ag helm-ispell helm-core async helm-company company helm helm-core async popup async helm-company company-ansible company company-coq dash yasnippet company company-math math-symbol-lists company company-ghc ghc haskell-mode company company-math math-symbol-lists company deferred docker json-mode json-snatcher json-reformat tablist s magit-popup dash async docker-tramp dash docker-tramp dockerfile-mode edts s popup f dash s erlang eproject helm helm-core async popup async dash auto-highlight-symbol auto-complete popup eproject helm helm-core async popup async erlang evil-args evil goto-chg undo-tree evil-jumper evil goto-chg undo-tree evil-magit magit magit-popup dash async git-commit with-editor dash async dash with-editor dash async dash async evil goto-chg undo-tree evil-nerd-commenter flycheck-haskell let-alist seq dash haskell-mode flycheck let-alist pkg-info epl dash flycheck-plantuml plantuml-mode let-alist pkg-info epl dash gh-md ghc haskell-mode ghci-completion goto-chg grizzl helm-idris idris-mode prop-menu helm helm-core async popup async hindent idris-mode prop-menu import-popwin popwin interaction-log intero haskell-mode company let-alist pkg-info epl dash json-mode json-snatcher json-reformat json-reformat json-snatcher let-alist magit magit-popup dash async git-commit with-editor dash async dash with-editor dash async dash async magit-popup dash async markdown-mode math-symbol-lists nix-mode ob-diagrams org-ac yaxception log4e auto-complete-pcmp yaxception log4e auto-complete popup org-babel-eval-in-repl eval-in-repl ace-window avy paredit dash org-pandoc ox-pandoc ht dash dash org ox-reveal org pandoc-mode dash hydra paredit pkg-info epl plantuml-mode popup popwin prop-menu psci f dash s s dash purescript-mode purescript-mode rust-mode s shm slime macrostep smart-tab smartparens dash sml-mode solarized-theme dash tablist undo-tree w3m with-editor dash async yasnippet yaxception))
 
 ;;; fetch the list of packages available
 (unless package-archive-contents
@@ -71,7 +71,11 @@
  '(haskell-process-log t)
  '(haskell-process-suggest-remove-import-lines t)
  '(haskell-process-type (quote stack-ghci))
- '(haskell-tags-on-save t))
+ '(haskell-tags-on-save nil)
+ '(kill-whole-line t)
+ '(package-selected-packages
+   (quote
+    (projectile whole-line-or-region znc w3m solarized-theme sml-mode smartparens smart-tab slime shm rust-mode psci paredit-everywhere pandoc-mode ox-reveal ox-pandoc org-pandoc org-babel-eval-in-repl org-ac ob-diagrams nix-mode markdown-mode intero interaction-log import-popwin hindent helm-ispell helm-idris helm-git-grep helm-git helm-ghc helm-descbinds helm-company helm-ag grizzl ghci-completion gh-md flycheck-plantuml flycheck-haskell flycheck-ghcmod evil-nerd-commenter evil-magit evil-leader evil-jumper evil-args edts dockerfile-mode docker deferred company-lua company-go company-ghci company-ghc company-coq company-cabal company-c-headers company-ansible))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -79,32 +83,30 @@
  ;; If there is more than one, they won't work right.
  )
 
-;;; comments toggler
-;;; http://www.emacswiki.org/emacs/CommentingCode
-(defun toggle-comment ()
-      (interactive)
-      (let ((start (line-beginning-position))
-            (end (line-end-position)))
-        (when (region-active-p)
-          (setq start (save-excursion
-                        (goto-char (region-beginning))
-                        (beginning-of-line)
-                        (point))
-                end (save-excursion
-                      (goto-char (region-end))
-                      (end-of-line)
-                      (point))))
-        (comment-or-uncomment-region start end)))
-
 ;;; evil-nerd-commenter
 (evilnc-default-hotkeys)
+(global-set-key (kbd "M-;") 'evilnc-comment-or-uncomment-lines)
+;; (global-set-key (kbd "C-c l") 'evilnc-quick-comment-or-uncomment-to-the-line)
+;; (global-set-key (kbd "C-c c") 'evilnc-copy-and-comment-lines)
+;; (global-set-key (kbd "C-c p") 'evilnc-comment-or-uncomment-paragraphs)
+
+;; Vim key bindings
+(require 'evil-leader)
+(global-evil-leader-mode)
+;; (evil-leader/set-key
+;;   "ci" 'evilnc-comment-or-uncomment-lines
+;;   "cl" 'evilnc-quick-comment-or-uncomment-to-the-line
+;;   "ll" 'evilnc-quick-comment-or-uncomment-to-the-line
+;;   "cc" 'evilnc-copy-and-comment-lines
+;;   "cp" 'evilnc-comment-or-uncomment-paragraphs
+;;   "cr" 'comment-or-uncomment-region
+;;   "cv" 'evilnc-toggle-invert-comment-line-by-line
+;;   "\\" 'evilnc-comment-operator ; if you prefer backslash key
+;; )
 
 ;;; ========================
 ;;; global keyboard bindings
 ;;; ========================
-
-;;; requires 'toggle-comment
-(global-set-key (kbd "M-;") 'toggle-comment)
 
 ;;; align by regexp
 (global-set-key (kbd "C-x a r") 'align-regexp)
@@ -123,6 +125,19 @@
 ;;; Cabal
 (add-to-list 'exec-path "/Users/dr/.cabal/bin")
 
+
+;;; =======
+;;; company
+;;; =======
+(require 'company)
+(add-hook 'after-init-hook 'global-company-mode)
+
+;;; =======
+;;; elisp
+;;; =======
+
+(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+
 ;;; =======
 ;;; haskell
 ;;; =======
@@ -133,6 +148,13 @@
 
 ;;; haskell indentation
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+
+;;; completion
+(add-hook 'haskell-mode-hook
+          (lambda ()
+            (set (make-local-variable 'company-backends)
+                 (append '((company-capf company-dabbrev-code))
+                         company-backends))))
 
 ;;; block indentation
 (eval-after-load "haskell-mode"
@@ -157,17 +179,21 @@
 (define-key haskell-mode-map (kbd "C-c C-.") 'haskell-mode-format-imports)
 (define-key haskell-mode-map (kbd "C-'") 'haskell-interactive-bring)
 (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
+(define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
 (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
-(define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
 (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
 (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
 (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-navigate-imports-go)
 
 ;;; cabal-mode keys
 (define-key haskell-cabal-mode-map (kbd "C-'") 'haskell-interactive-bring)
+(define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-compile)
 (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
 (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
 (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
+
+;;; interactive haskell mode keys
+(define-key interactive-haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
 
 ;;; find call sites
 (define-key interactive-haskell-mode-map (kbd "M-,") 'haskell-who-calls)
@@ -198,19 +224,23 @@
 (define-key interactive-haskell-mode-map [f5] 'haskell-process-load-or-reload)
 (define-key interactive-haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
 (define-key interactive-haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
-(define-key interactive-haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
 (define-key interactive-haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
 (define-key interactive-haskell-mode-map (kbd "M-.") 'haskell-mode-goto-loc)
 (define-key interactive-haskell-mode-map (kbd "C-?") 'haskell-mode-find-uses)
 (define-key interactive-haskell-mode-map (kbd "C-c C-t") 'haskell-mode-show-type-at)
 
+;;; open helm-ghc on ghc-mod errors
+(add-hook 'haskell-mode-hook
+          (lambda () (define-key haskell-mode-map (kbd "C-c C-e") 'helm-ghc-errors)))
+
 ;;; hindent
 (define-key haskell-mode-map (kbd "C-c i") 'hindent/reformat-decl)
 
 ;;; make stack ghci default interactive shell
+;; (custom-set-variables '(haskell-process-type 'stack-ghci))
 
 ;;; make cabal-repl default interactive shell
-;;; (custom-set-variables '(haskell-process-type 'cabal-repl))
+;; (custom-set-variables '(haskell-process-type 'cabal-repl))
 
 ;;; --------
 ;;; hasktags
@@ -221,8 +251,8 @@
 ;;; to troubleshoot/reset use 'M-x tags-reset-tags-tables'
 (define-key haskell-mode-map (kbd "C-M-.") 'haskell-mode-jump-to-def-or-tag)
 
-;;; refresh tags on save
-
+;;; reload tags automatically
+(setq tags-revert-without-query 1)
 
 ;;; ------------------
 ;;; haddock w3m viewer
@@ -429,7 +459,7 @@
 (setq helm-buffers-fuzzy-matching t
       helm-recentf-fuzzy-match    t)
 
-(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run   persistent action
 (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
 (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
 
@@ -451,10 +481,65 @@
 (helm-descbinds-mode)
 
 ;; enable intero
-(add-hook 'haskell-mode-hook 'intero-mode)
+(setq intero-whitelist
+      '("/Users/dr/workspace/contractor/platform"
+        "/Users/dr/workspace/contractor/travel246"
+        "/Users/dr/workspace/contractor/b2b/backend"
+        "/Users/dr/workspace/contractor/atc-shopper"
+        "/Users/dr/workspace/contractor/tinkoff-travel"))
+(add-hook 'haskell-mode-hook 'intero-mode-whitelist)
+
+;;; default compilation with stack
+(setq
+ haskell-compile-cabal-build-command
+ "stack test $(basename %s) --fast --ghc-options=-ferror-spans --no-run-tests")
+
+(eval-after-load 'intero
+  '(defadvice intero-repl-load (around my-intero-repl-load first nil activate)
+      (let ((b (current-buffer)))
+        ad-do-it
+        (pop-to-buffer b))))
 
 ;; helm-company
 (eval-after-load 'company
   '(progn
      (define-key company-mode-map (kbd "C-:") 'helm-company)
      (define-key company-active-map (kbd "C-:") 'helm-company)))
+
+;; to know where the keybinding comes from, it's possible to use `locate-keybinding`
+(defun key-binding-at-point (key)
+  (mapcar (lambda (keymap) (when (keymapp keymap)
+                             (lookup-key keymap key)))
+          (list
+           ;; More likely
+           (get-text-property (point) 'keymap)
+           (mapcar (lambda (overlay)
+                     (overlay-get overlay 'keymap))
+                   (overlays-at (point)))
+           ;; Less likely
+           (get-text-property (point) 'local-map)
+           (mapcar (lambda (overlay)
+                     (overlay-get overlay 'local-map))
+                   (overlays-at (point))))))
+
+(defun locate-keybinding (key)
+  "Determine in which keymap KEY is defined."
+  (interactive "kPress key: ")
+  (let ((ret
+         (list
+          (key-binding-at-point key)
+          (minor-mode-key-binding key)
+          (local-key-binding key)
+          (global-key-binding key))))
+    (when (called-interactively-p 'any)
+      (message "At Point: %s\nMinor-mode: %s\nLocal: %s\nGlobal: %s"
+               (or (nth 0 ret) "")
+               (or (mapconcat (lambda (x) (format "%s: %s" (car x) (cdr x)))
+                              (nth 1 ret) "\n             ")
+                   "")
+               (or (nth 2 ret) "")
+               (or (nth 3 ret) "")))
+    ret))
+
+;; automatically scroll eshell buffers
+(setq  eshell-scroll-to-bottom-on-output 'all)
